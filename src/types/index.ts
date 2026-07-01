@@ -81,10 +81,20 @@ export interface VideoLink {
   createdAt: string;
 }
 
-export type Page = "dashboard" | "bee" | "poultry" | "garden" | "settings";
+export interface JournalEntry {
+  id: string;
+  title: string;
+  content: string;
+  mood: "happy" | "calm" | "tired" | "excited" | "grateful" | "reflective";
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type Page = "dashboard" | "bee" | "poultry" | "garden" | "journal" | "settings";
 
 export interface AppState {
   videoLinks: VideoLink[];
+  journalEntries: JournalEntry[];
   beehives: Beehive[];
   inspections: BeeInspection[];
   poultries: Poultry[];

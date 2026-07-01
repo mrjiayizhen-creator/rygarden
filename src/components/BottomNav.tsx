@@ -1,5 +1,5 @@
 import type { Page } from "@/types";
-import { LayoutDashboard, Bug, Bird, Sprout, Settings } from "lucide-react";
+import { LayoutDashboard, Bug, Bird, Sprout, BookOpen } from "lucide-react";
 
 interface BottomNavProps {
   current: Page;
@@ -11,7 +11,7 @@ const tabs: { key: Page; label: string; icon: React.ReactNode }[] = [
   { key: "bee", label: "蜂群", icon: <Bug className="w-5 h-5" /> },
   { key: "poultry", label: "家禽", icon: <Bird className="w-5 h-5" /> },
   { key: "garden", label: "菜园", icon: <Sprout className="w-5 h-5" /> },
-  { key: "settings", label: "设置", icon: <Settings className="w-5 h-5" /> },
+  { key: "journal", label: "心得", icon: <BookOpen className="w-5 h-5" /> },
 ];
 
 export function BottomNav({ current, onNavigate }: BottomNavProps) {

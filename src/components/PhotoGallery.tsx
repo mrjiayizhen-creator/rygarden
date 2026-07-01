@@ -5,7 +5,7 @@ import { uploadMedia, deleteMedia } from "@/lib/mediaStore";
 interface PhotoGalleryProps {
   photos: { id: string; url: string }[];
   entityId: string;
-  entityType: "beehive" | "poultry" | "cropPlot";
+  entityType: "beehive" | "poultry" | "cropPlot" | "journal";
   onPhotosChange: () => void;
 }
 

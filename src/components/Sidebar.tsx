@@ -1,6 +1,6 @@
 import type { Page } from "@/types";
 import type { User } from "@/hooks/useAuth";
-import { LayoutDashboard, Bug, Bird, Sprout, Settings, Flower2, LogIn, LogOut, User as UserIcon, ChevronDown } from "lucide-react";
+import { LayoutDashboard, Bug, Bird, Sprout, Settings, BookOpen, Flower2, LogIn, LogOut, User as UserIcon, ChevronDown } from "lucide-react";
 import { useState } from "react";
 
 interface SidebarProps {
@@ -16,6 +16,7 @@ const tabs: { key: Page; label: string; icon: React.ReactNode }[] = [
   { key: "bee", label: "蜂群管理", icon: <Bug className="w-5 h-5" /> },
   { key: "poultry", label: "家禽饲养", icon: <Bird className="w-5 h-5" /> },
   { key: "garden", label: "菜园四季", icon: <Sprout className="w-5 h-5" /> },
+  { key: "journal", label: "心得笔记", icon: <BookOpen className="w-5 h-5" /> },
   { key: "settings", label: "设置", icon: <Settings className="w-5 h-5" /> },
 ];
 

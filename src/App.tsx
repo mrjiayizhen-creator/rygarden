@@ -6,6 +6,7 @@ import { Dashboard } from "@/sections/Dashboard";
 import { BeeManagement } from "@/sections/BeeManagement";
 import { PoultryManagement } from "@/sections/PoultryManagement";
 import { GardenManagement } from "@/sections/GardenManagement";
+import { JournalPage } from "@/sections/JournalPage";
 import { useLocalStore } from "@/hooks/useLocalStore";
 import { useAuth } from "@/hooks/useAuth";
 import type { Page, VideoLink } from "@/types";
@@ -164,6 +165,13 @@ function App() {
             removePlot={(id) => removeItem("cropPlots", id)}
             onAddVideo={handleAddVideo}
             onRemoveVideo={handleRemoveVideo}
+          />
+        )}
+        {currentPage === "journal" && (
+          <JournalPage
+            state={state}
+            addItem={(key, item) => addItem(key, item)}
+            removeItem={(key, id) => removeItem(key, id)}
           />
         )}
         {currentPage === "settings" && <SettingsPage />}

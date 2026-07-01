@@ -12,6 +12,7 @@ const defaultState: AppState = {
   cropPlots: [],
   gardenLogs: [],
   videoLinks: [],
+  journalEntries: [],
 };
 
 function getStorageKey(userId: string | null): string {
@@ -108,10 +109,15 @@ export function useLocalStore(userId: string | null = null) {
         { id: "g3", plotId: "c2", date: today, action: "pruned", detail: "摘除底部老叶，增加通风" },
       ],
       videoLinks: [],
+      journalEntries: [
+        { id: "j1", title: "春日的第一批蜜蜂", content: "今天东院的槐花全开了，蜜蜂出勤率明显上升。蜂箱 A 的工蜂忙得不可开交，巢门口进进出出的花粉篮都是黄澄澄的槐花粉。\n\n检查时发现蜂王产卵非常活跃，子脾面积比上周增加了将近一倍。看来今年春天的蜜源很不错，期待第一次摇蜜！", mood: "excited", createdAt: now, updatedAt: now },
+        { id: "j2", title: "芦花鸡孵蛋观察", content: "花花今天已经趴窝第 18 天了，按照孵化周期应该就在这两天出壳。\n\n我轻轻靠近听了听，能听到蛋壳里传来的微弱啾啾声，小鸡已经在啄壳了！给花花准备了温水和新鲜小米，她几乎寸步不离。\n\n期待明天能看到小鸡崽。", mood: "happy", createdAt: now, updatedAt: now },
+        { id: "j3", title: "小青菜丰收", content: "C区的上海青今天全部收获完毕！从播种到采收只用了 55 天，比预期还快了 5 天。\n\n产量统计：约 15 斤，品质很好，叶子翠绿水灵。留了一半自家吃，另一半送给了隔壁王叔。\n\n下一茬准备种空心菜，已经整好地了。", mood: "grateful", createdAt: now, updatedAt: now },
+      ],
     });
   }, []);
 
-  const hasData = state.beehives.length > 0 || state.poultries.length > 0 || state.cropPlots.length > 0;
+  const hasData = state.beehives.length > 0 || state.poultries.length > 0 || state.cropPlots.length > 0 || state.journalEntries.length > 0;
 
   return {
     state,

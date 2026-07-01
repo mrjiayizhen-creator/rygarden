@@ -5,7 +5,7 @@ const STORE_NAME = "media-files";
 interface MediaRecord {
   id: string;
   entityId: string;
-  entityType: "beehive" | "poultry" | "cropPlot";
+  entityType: "beehive" | "poultry" | "cropPlot" | "journal";
   blob: Blob;
   mimeType: string;
   createdAt: string;
