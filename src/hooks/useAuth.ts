@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import type { UserRole } from "@/types";
 
 const USERS_KEY = "tianyuan-users";
 const SESSION_KEY = "tianyuan-session";
@@ -6,6 +7,7 @@ const SESSION_KEY = "tianyuan-session";
 export interface User {
   id: string;
   username: string;
+  role: UserRole;
   createdAt: string;
 }
 
@@ -13,6 +15,7 @@ interface StoredUser {
   id: string;
   username: string;
   passwordHash: string;
+  role: UserRole;
   createdAt: string;
 }
 
@@ -32,7 +35,19 @@ async function hashPassword(password: string): Promise<string> {
 function loadUsers(): StoredUser[] {
   try {
     const raw = localStorage.getItem(USERS_KEY);
-    return raw ? JSON.parse(raw) : [];
+    const users: StoredUser[] = raw ? JSON.parse(raw) : [];
+    // Ensure all users have a role field (migration for existing data)
+    let needsSave = false;
+    for (const u of users) {
+      if (!u.role) {
+        u.role = "user";
+        needsSave = true;
+      }
+    }
+    if (needsSave) {
+      saveUsers(users);
+    }
+    return users;
   } catch {
     return [];
   }
@@ -54,27 +69,46 @@ function saveSession(userId: string | null) {
   }
 }
 
+async function ensureAdminExists() {
+  const users = loadUsers();
+  if (users.length === 0) {
+    const adminHash = await hashPassword("admin123");
+    const adminUser: StoredUser = {
+      id: generateId(),
+      username: "admin",
+      passwordHash: adminHash,
+      role: "admin",
+      createdAt: new Date().toISOString(),
+    };
+    users.push(adminUser);
+    saveUsers(users);
+  }
+}
+
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const userId = loadSession();
-    if (userId) {
-      const users = loadUsers();
-      const found = users.find((u) => u.id === userId);
-      if (found) {
-        setUser({
-          id: found.id,
-          username: found.username,
-          createdAt: found.createdAt,
-        });
-      } else {
-        saveSession(null);
+    ensureAdminExists().then(() => {
+      const userId = loadSession();
+      if (userId) {
+        const users = loadUsers();
+        const found = users.find((u) => u.id === userId);
+        if (found) {
+          setUser({
+            id: found.id,
+            username: found.username,
+            role: found.role || "user",
+            createdAt: found.createdAt,
+          });
+        } else {
+          saveSession(null);
+        }
       }
-    }
-    setIsLoading(false);
+      setIsLoading(false);
+    });
   }, []);
 
   const login = useCallback(async (username: string, password: string): Promise<boolean> => {
@@ -94,6 +128,7 @@ export function useAuth() {
     setUser({
       id: found.id,
       username: found.username,
+      role: found.role || "user",
       createdAt: found.createdAt,
     });
     return true;
@@ -119,6 +154,7 @@ export function useAuth() {
       id: generateId(),
       username: username.trim(),
       passwordHash: hash,
+      role: "user",
       createdAt: new Date().toISOString(),
     };
     users.push(newUser);
@@ -127,6 +163,7 @@ export function useAuth() {
     setUser({
       id: newUser.id,
       username: newUser.username,
+      role: newUser.role,
       createdAt: newUser.createdAt,
     });
     return true;
@@ -141,13 +178,43 @@ export function useAuth() {
     setError(null);
   }, []);
 
+  const isAdmin = user?.role === "admin";
+
+  const getAllUsers = useCallback((): StoredUser[] => {
+    return loadUsers().map(({ passwordHash: _, ...rest }) => rest) as unknown as StoredUser[];
+  }, []);
+
+  const updateUserRole = useCallback((userId: string, newRole: UserRole) => {
+    const users = loadUsers();
+    const idx = users.findIndex((u) => u.id === userId);
+    if (idx === -1) return false;
+    users[idx].role = newRole;
+    saveUsers(users);
+    // If updating current user, refresh
+    setUser((prev) => prev?.id === userId ? { ...prev, role: newRole } : prev);
+    return true;
+  }, []);
+
+  const deleteUser = useCallback((userId: string) => {
+    if (userId === user?.id) return false; // Can't delete self
+    const users = loadUsers();
+    const filtered = users.filter((u) => u.id !== userId);
+    if (filtered.length === users.length) return false;
+    saveUsers(filtered);
+    return true;
+  }, [user]);
+
   return {
     user,
     isLoading,
     error,
+    isAdmin,
     login,
     register,
     logout,
     clearError,
+    getAllUsers,
+    updateUserRole,
+    deleteUser,
   };
 }

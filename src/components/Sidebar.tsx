@@ -1,6 +1,6 @@
 import type { Page } from "@/types";
 import type { User } from "@/hooks/useAuth";
-import { LayoutDashboard, Bug, Bird, Sprout, Settings, BookOpen, Flower2, LogIn, LogOut, User as UserIcon, ChevronDown } from "lucide-react";
+import { LayoutDashboard, Bug, Bird, Sprout, Settings, BookOpen, Shield, Flower2, LogIn, LogOut, User as UserIcon, ChevronDown } from "lucide-react";
 import { useState } from "react";
 
 interface SidebarProps {
@@ -23,6 +23,10 @@ const tabs: { key: Page; label: string; icon: React.ReactNode }[] = [
 export function Sidebar({ current, onNavigate, user, onOpenAuth, onLogout }: SidebarProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
 
+  const allTabs = user?.role === "admin"
+    ? [...tabs, { key: "admin" as Page, label: "后台管理", icon: <Shield className="w-5 h-5" /> }]
+    : tabs;
+
   return (
     <aside className="hidden sm:flex flex-col w-56 h-screen sticky top-0 border-r border-border bg-card shrink-0">
       <div className="flex items-center gap-2.5 px-5 h-16 border-b border-border">
@@ -30,14 +34,16 @@ export function Sidebar({ current, onNavigate, user, onOpenAuth, onLogout }: Sid
         <span className="font-semibold text-base text-foreground">田园管家</span>
       </div>
       <nav className="flex-1 py-4 px-3 space-y-1">
-        {tabs.map((tab) => (
+        {allTabs.map((tab) => (
           <button
             key={tab.key}
             onClick={() => onNavigate(tab.key)}
             className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150 ${
               current === tab.key
                 ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:bg-secondary hover:text-secondary-foreground"
+                : tab.key === "admin"
+                  ? "text-red-600/80 hover:bg-red-50 hover:text-red-700"
+                  : "text-muted-foreground hover:bg-secondary hover:text-secondary-foreground"
             }`}
           >
             {tab.icon}

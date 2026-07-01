@@ -1,20 +1,24 @@
 import type { Page } from "@/types";
-import { LayoutDashboard, Bug, Bird, Sprout, BookOpen } from "lucide-react";
+import type { User } from "@/hooks/useAuth";
+import { LayoutDashboard, Bug, Bird, Sprout, BookOpen, Shield } from "lucide-react";
 
 interface BottomNavProps {
   current: Page;
   onNavigate: (page: Page) => void;
+  user: User | null;
 }
 
-const tabs: { key: Page; label: string; icon: React.ReactNode }[] = [
-  { key: "dashboard", label: "首页", icon: <LayoutDashboard className="w-5 h-5" /> },
-  { key: "bee", label: "蜂群", icon: <Bug className="w-5 h-5" /> },
-  { key: "poultry", label: "家禽", icon: <Bird className="w-5 h-5" /> },
-  { key: "garden", label: "菜园", icon: <Sprout className="w-5 h-5" /> },
-  { key: "journal", label: "心得", icon: <BookOpen className="w-5 h-5" /> },
-];
-
-export function BottomNav({ current, onNavigate }: BottomNavProps) {
+export function BottomNav({ current, onNavigate, user }: BottomNavProps) {
+  const tabs: { key: Page; label: string; icon: React.ReactNode }[] = [
+    { key: "dashboard", label: "首页", icon: <LayoutDashboard className="w-5 h-5" /> },
+    { key: "bee", label: "蜂群", icon: <Bug className="w-5 h-5" /> },
+    { key: "poultry", label: "家禽", icon: <Bird className="w-5 h-5" /> },
+    { key: "garden", label: "菜园", icon: <Sprout className="w-5 h-5" /> },
+    { key: "journal", label: "心得", icon: <BookOpen className="w-5 h-5" /> },
+  ];
+  if (user?.role === "admin") {
+    tabs.push({ key: "admin", label: "管理", icon: <Shield className="w-5 h-5" /> });
+  }
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border safe-area-bottom sm:hidden">
       <div className="flex items-center justify-around h-16">
@@ -24,7 +28,7 @@ export function BottomNav({ current, onNavigate }: BottomNavProps) {
             onClick={() => onNavigate(tab.key)}
             className={`flex flex-col items-center justify-center gap-0.5 w-full h-full transition-colors duration-150 ${
               current === tab.key
-                ? "text-primary"
+                ? tab.key === "admin" ? "text-red-600" : "text-primary"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >

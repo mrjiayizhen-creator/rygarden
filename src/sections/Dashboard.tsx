@@ -1,8 +1,9 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Bug, Bird, Sprout, Calendar, AlertTriangle, TrendingUp, Plus, Sun, CloudRain, Leaf } from "lucide-react";
-import type { AppState, Page } from "@/types";
+import { Bug, Bird, Sprout, Calendar, AlertTriangle, TrendingUp, Plus, Sun, CloudRain, Leaf, Megaphone, X } from "lucide-react";
+import type { AppState, Page, SiteConfig } from "@/types";
+import { useState, useEffect } from "react";
 
 interface DashboardProps {
   state: AppState;
@@ -22,6 +23,21 @@ function getSeason(): { name: string; icon: React.ReactNode; emoji: string } {
 export function Dashboard({ state, hasData, seedDemoData, onNavigate }: DashboardProps) {
   const season = getSeason();
   const today = new Date().toISOString().split("T")[0];
+  const [announcementDismissed, setAnnouncementDismissed] = useState(false);
+
+  // Load site config announcement
+  const [announcement, setAnnouncement] = useState<{ text: string; show: boolean }>({ text: "", show: false });
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("tianyuan-site-config");
+      if (raw) {
+        const config: SiteConfig = JSON.parse(raw);
+        if (config.showAnnouncement && config.announcement) {
+          setAnnouncement({ text: config.announcement, show: true });
+        }
+      }
+    } catch { /* ignore */ }
+  }, []);
 
   const todayInspections = state.inspections.filter((i) => i.date === today);
   const todayFeedings = state.feedingRecords.filter((f) => f.date === today);
@@ -55,6 +71,22 @@ export function Dashboard({ state, hasData, seedDemoData, onNavigate }: Dashboar
 
   return (
     <div className="page-container space-y-6">
+      {/* Announcement Banner */}
+      {announcement.show && !announcementDismissed && (
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3 animate-in slide-in-from-top-2 duration-300">
+          <Megaphone className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm text-blue-800 font-medium">公告</p>
+            <p className="text-sm text-blue-700 mt-0.5">{announcement.text}</p>
+          </div>
+          <button
+            onClick={() => setAnnouncementDismissed(true)}
+            className="text-blue-400 hover:text-blue-600 transition-colors shrink-0"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
       <div className="rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-accent/10 p-6 border border-primary/20">
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
           <Calendar className="w-4 h-4" />

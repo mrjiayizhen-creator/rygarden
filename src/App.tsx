@@ -6,6 +6,7 @@ import { Dashboard } from "@/sections/Dashboard";
 import { BeeManagement } from "@/sections/BeeManagement";
 import { PoultryManagement } from "@/sections/PoultryManagement";
 import { GardenManagement } from "@/sections/GardenManagement";
+import { AdminPanel } from "@/sections/AdminPanel";
 import { JournalPage } from "@/sections/JournalPage";
 import { useLocalStore } from "@/hooks/useLocalStore";
 import { useAuth } from "@/hooks/useAuth";
@@ -42,7 +43,7 @@ function App() {
   const [authOpen, setAuthOpen] = useState(false);
   const [showMobileUserMenu, setShowMobileUserMenu] = useState(false);
 
-  const { user, isLoading, error, login, register, logout, clearError } = useAuth();
+  const { user, isLoading, error, isAdmin, login, register, logout, clearError, getAllUsers, updateUserRole, deleteUser } = useAuth();
   const userId = user?.id ?? null;
   const { state, addItem, updateItem, removeItem, seedDemoData, hasData } = useLocalStore(userId);
 
@@ -175,9 +176,18 @@ function App() {
           />
         )}
         {currentPage === "settings" && <SettingsPage />}
+        {currentPage === "admin" && user && (
+          <AdminPanel
+            state={state}
+            user={user}
+            getAllUsers={getAllUsers}
+            updateUserRole={updateUserRole}
+            deleteUser={deleteUser}
+          />
+        )}
       </main>
 
-      <BottomNav current={currentPage} onNavigate={setCurrentPage} />
+      <BottomNav current={currentPage} onNavigate={setCurrentPage} user={user} />
 
       {/* Auth Modal */}
       <AuthModal

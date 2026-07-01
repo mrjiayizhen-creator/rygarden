@@ -90,7 +90,17 @@ export interface JournalEntry {
   updatedAt: string;
 }
 
-export type Page = "dashboard" | "bee" | "poultry" | "garden" | "journal" | "settings";
+export type Page = "dashboard" | "bee" | "poultry" | "garden" | "journal" | "settings" | "admin";
+
+export type UserRole = "admin" | "user";
+
+export interface SiteConfig {
+  siteName: string;
+  siteDescription: string;
+  announcement: string;
+  showAnnouncement: boolean;
+  updatedAt: string;
+}
 
 export interface AppState {
   videoLinks: VideoLink[];
