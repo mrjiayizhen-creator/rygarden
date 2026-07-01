@@ -6,10 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Plus, TrendingUp, Calendar, Egg, Wheat, ChevronRight, Image as ImageIcon } from "lucide-react";
+import { Plus, TrendingUp, Calendar, Egg, Wheat, ChevronRight, Image as ImageIcon, Video } from "lucide-react";
 import { PhotoGallery } from "@/components/PhotoGallery";
+import { VideoEmbed } from "@/components/VideoEmbed";
 import { getMediaForEntity } from "@/lib/mediaStore";
-import type { Poultry, FeedingRecord, EggRecord, AppState } from "@/types";
+import type { Poultry, FeedingRecord, EggRecord, AppState, VideoLink } from "@/types";
 
 interface PoultryManagementProps {
   state: AppState;
@@ -17,6 +18,8 @@ interface PoultryManagementProps {
   addItemGeneric: (key: "feedingRecords", item: FeedingRecord) => void;
   addItemGeneric2: (key: "eggRecords", item: EggRecord) => void;
   removeItem: (key: "poultries", id: string) => void;
+  onAddVideo: (video: Omit<VideoLink, "id" | "createdAt">) => void;
+  onRemoveVideo: (id: string) => void;
 }
 
 const typeLabels: Record<string, string> = {
@@ -33,7 +36,7 @@ const statusBadge: Record<string, { label: string; variant: "default" | "seconda
   deceased: { label: "已死亡", variant: "outline" },
 };
 
-export function PoultryManagement({ state, addItem, addItemGeneric, addItemGeneric2, removeItem }: PoultryManagementProps) {
+export function PoultryManagement({ state, addItem, addItemGeneric, addItemGeneric2, removeItem, onAddVideo, onRemoveVideo }: PoultryManagementProps) {
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({ name: "", type: "chicken" as Poultry["type"], breed: "", age: "90", gender: "hen" as Poultry["gender"] });
   const [showFeeding, setShowFeeding] = useState(false);
@@ -183,6 +186,16 @@ export function PoultryManagement({ state, addItem, addItemGeneric, addItemGener
                         entityId={p.id}
                         entityType="poultry"
                         onPhotosChange={loadPhotos}
+                      />
+                      <p className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+                        <Video className="w-3.5 h-3.5" />{p.name}的视频
+                      </p>
+                      <VideoEmbed
+                        videos={state.videoLinks.filter((v) => v.entityId === p.id && v.entityType === "poultry")}
+                        entityId={p.id}
+                        entityType="poultry"
+                        onAdd={onAddVideo}
+                        onRemove={onRemoveVideo}
                       />
                       <div className="flex gap-2">
                         <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive text-xs" onClick={(e) => { e.stopPropagation(); removeItem("poultries", p.id); setSelectedPoultry(null); }}>

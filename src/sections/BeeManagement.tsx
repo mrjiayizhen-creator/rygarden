@@ -6,10 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Clock, MapPin, Heart, ChevronRight, Image as ImageIcon } from "lucide-react";
+import { Plus, Clock, MapPin, Heart, ChevronRight, Image as ImageIcon, Video } from "lucide-react";
 import { PhotoGallery } from "@/components/PhotoGallery";
+import { VideoEmbed } from "@/components/VideoEmbed";
 import { getMediaForEntity } from "@/lib/mediaStore";
-import type { Beehive, BeeInspection, AppState } from "@/types";
+import type { Beehive, BeeInspection, AppState, VideoLink } from "@/types";
 
 interface BeeManagementProps {
   state: AppState;
@@ -17,6 +18,8 @@ interface BeeManagementProps {
   addInspection: (item: BeeInspection) => void;
   updateItem: (key: "beehives", id: string, updates: Partial<Beehive>) => void;
   removeItem: (key: "beehives", id: string) => void;
+  onAddVideo: (video: Omit<VideoLink, "id" | "createdAt">) => void;
+  onRemoveVideo: (id: string) => void;
 }
 
 const queenStatusMap: Record<string, { label: string; variant: "default" | "secondary" | "outline" }> = {
@@ -31,7 +34,7 @@ const strengthMap: Record<string, { label: string; color: string }> = {
   weak: { label: "弱群", color: "bg-red-500" },
 };
 
-export function BeeManagement({ state, addItem, addInspection, updateItem, removeItem }: BeeManagementProps) {
+export function BeeManagement({ state, addItem, addInspection, updateItem, removeItem, onAddVideo, onRemoveVideo }: BeeManagementProps) {
   const [showAdd, setShowAdd] = useState(false);
   const [selectedHive, setSelectedHive] = useState<string | null>(null);
   const [showInspection, setShowInspection] = useState(false);
@@ -174,6 +177,20 @@ export function BeeManagement({ state, addItem, addInspection, updateItem, remov
                         entityId={h.id}
                         entityType="beehive"
                         onPhotosChange={loadPhotos}
+                      />
+                    </div>
+
+                    {/* Videos */}
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
+                        <Video className="w-3.5 h-3.5" />蜂箱视频
+                      </p>
+                      <VideoEmbed
+                        videos={state.videoLinks.filter((v) => v.entityId === h.id && v.entityType === "beehive")}
+                        entityId={h.id}
+                        entityType="beehive"
+                        onAdd={onAddVideo}
+                        onRemove={onRemoveVideo}
                       />
                     </div>
 

@@ -71,9 +71,20 @@ export interface GardenLog {
   harvestAmount?: number;
 }
 
+export interface VideoLink {
+  id: string;
+  entityId: string;
+  entityType: "beehive" | "poultry" | "cropPlot";
+  url: string;
+  platform: "bilibili" | "youku" | "other";
+  title: string;
+  createdAt: string;
+}
+
 export type Page = "dashboard" | "bee" | "poultry" | "garden" | "settings";
 
 export interface AppState {
+  videoLinks: VideoLink[];
   beehives: Beehive[];
   inspections: BeeInspection[];
   poultries: Poultry[];

@@ -11,6 +11,7 @@ const defaultState: AppState = {
   eggRecords: [],
   cropPlots: [],
   gardenLogs: [],
+  videoLinks: [],
 };
 
 function getStorageKey(userId: string | null): string {
@@ -106,6 +107,7 @@ export function useLocalStore(userId: string | null = null) {
         { id: "g2", plotId: "c1", date: today, action: "fertilized", detail: "追施有机鸡粪肥 2kg" },
         { id: "g3", plotId: "c2", date: today, action: "pruned", detail: "摘除底部老叶，增加通风" },
       ],
+      videoLinks: [],
     });
   }, []);
 

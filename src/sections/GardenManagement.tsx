@@ -7,15 +7,18 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PhotoGallery } from "@/components/PhotoGallery";
+import { VideoEmbed } from "@/components/VideoEmbed";
 import { getMediaForEntity } from "@/lib/mediaStore";
-import { Plus, Sprout, Droplets, Scissors, Shovel, Bug, Image as ImageIcon } from "lucide-react";
-import type { CropPlot, GardenLog, AppState } from "@/types";
+import { Plus, Sprout, Droplets, Scissors, Shovel, Bug, Image as ImageIcon, Video } from "lucide-react";
+import type { CropPlot, GardenLog, AppState, VideoLink } from "@/types";
 
 interface GardenProps {
   state: AppState;
   addPlot: (item: CropPlot) => void;
   addLog: (item: GardenLog) => void;
   removePlot: (id: string) => void;
+  onAddVideo: (video: Omit<VideoLink, "id" | "createdAt">) => void;
+  onRemoveVideo: (id: string) => void;
 }
 
 const seasons = [
@@ -55,7 +58,7 @@ const actionLabels: Record<GardenLog["action"], string> = {
   planted: "播种",
 };
 
-export function GardenManagement({ state, addPlot, addLog, removePlot }: GardenProps) {
+export function GardenManagement({ state, addPlot, addLog, removePlot, onAddVideo, onRemoveVideo }: GardenProps) {
   const [seasonFilter, setSeasonFilter] = useState<string>("all");
   const [showAddPlot, setShowAddPlot] = useState(false);
   const [showAddLog, setShowAddLog] = useState(false);
@@ -200,6 +203,20 @@ export function GardenManagement({ state, addPlot, addLog, removePlot }: GardenP
                         entityId={plot.id}
                         entityType="cropPlot"
                         onPhotosChange={loadPhotos}
+                      />
+                    </div>
+
+                    {/* Videos */}
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
+                        <Video className="w-3.5 h-3.5" />菜地视频
+                      </p>
+                      <VideoEmbed
+                        videos={state.videoLinks.filter((v) => v.entityId === plot.id && v.entityType === "cropPlot")}
+                        entityId={plot.id}
+                        entityType="cropPlot"
+                        onAdd={onAddVideo}
+                        onRemove={onRemoveVideo}
                       />
                     </div>
 

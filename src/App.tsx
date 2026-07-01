@@ -8,7 +8,7 @@ import { PoultryManagement } from "@/sections/PoultryManagement";
 import { GardenManagement } from "@/sections/GardenManagement";
 import { useLocalStore } from "@/hooks/useLocalStore";
 import { useAuth } from "@/hooks/useAuth";
-import type { Page } from "@/types";
+import type { Page, VideoLink } from "@/types";
 import { User, LogIn, LogOut, ChevronDown, Flower2 } from "lucide-react";
 import "./App.css";
 
@@ -44,6 +44,18 @@ function App() {
   const { user, isLoading, error, login, register, logout, clearError } = useAuth();
   const userId = user?.id ?? null;
   const { state, addItem, updateItem, removeItem, seedDemoData, hasData } = useLocalStore(userId);
+
+  const handleAddVideo = useCallback((video: Omit<VideoLink, "id" | "createdAt">) => {
+    addItem("videoLinks", {
+      ...video,
+      id: `v${Date.now()}`,
+      createdAt: new Date().toISOString(),
+    });
+  }, [addItem]);
+
+  const handleRemoveVideo = useCallback((id: string) => {
+    removeItem("videoLinks", id);
+  }, [removeItem]);
 
   const handleLogout = useCallback(() => {
     logout();
@@ -129,6 +141,8 @@ function App() {
             addInspection={(item) => addItem("inspections", item)}
             updateItem={(key, id, updates) => updateItem(key, id, updates)}
             removeItem={(key, id) => removeItem(key, id)}
+            onAddVideo={handleAddVideo}
+            onRemoveVideo={handleRemoveVideo}
           />
         )}
         {currentPage === "poultry" && (
@@ -138,6 +152,8 @@ function App() {
             addItemGeneric={(key, item) => addItem(key, item)}
             addItemGeneric2={(key, item) => addItem(key, item)}
             removeItem={(key, id) => removeItem(key, id)}
+            onAddVideo={handleAddVideo}
+            onRemoveVideo={handleRemoveVideo}
           />
         )}
         {currentPage === "garden" && (
@@ -146,6 +162,8 @@ function App() {
             addPlot={(item) => addItem("cropPlots", item)}
             addLog={(item) => addItem("gardenLogs", item)}
             removePlot={(id) => removeItem("cropPlots", id)}
+            onAddVideo={handleAddVideo}
+            onRemoveVideo={handleRemoveVideo}
           />
         )}
         {currentPage === "settings" && <SettingsPage />}
