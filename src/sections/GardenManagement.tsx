@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Sprout, Droplets, Scissors, Shovel, Bug } from "lucide-react";
+import { PhotoGallery } from "@/components/PhotoGallery";
+import { getMediaForEntity } from "@/lib/mediaStore";
+import { Plus, Sprout, Droplets, Scissors, Shovel, Bug, Image as ImageIcon } from "lucide-react";
 import type { CropPlot, GardenLog, AppState } from "@/types";
 
 interface GardenProps {
@@ -61,6 +63,15 @@ export function GardenManagement({ state, addPlot, addLog, removePlot }: GardenP
 
   const [plotForm, setPlotForm] = useState({ name: "", crop: "", season: "summer" as CropPlot["season"], plantedDate: "", expectedHarvest: "", area: "10", notes: "" });
   const [logForm, setLogForm] = useState({ action: "watered" as GardenLog["action"], detail: "", harvestAmount: "" });
+
+  // Photo system
+  const [plotPhotos, setPlotPhotos] = useState<{ id: string; url: string }[]>([]);
+  const loadPhotos = useCallback(async () => {
+    if (!selectedPlotId) { setPlotPhotos([]); return; }
+    const photos = await getMediaForEntity(selectedPlotId, "cropPlot");
+    setPlotPhotos(photos);
+  }, [selectedPlotId]);
+  useEffect(() => { loadPhotos(); }, [loadPhotos]);
 
   const filteredPlots = seasonFilter === "all" ? state.cropPlots : state.cropPlots.filter((p) => p.season === seasonFilter);
   const selectedPlot = state.cropPlots.find((p) => p.id === selectedPlotId);
@@ -178,6 +189,19 @@ export function GardenManagement({ state, addPlot, addLog, removePlot }: GardenP
                         ))}
                       </div>
                     )}
+
+                    {/* Photos */}
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
+                        <ImageIcon className="w-3.5 h-3.5" />菜地照片
+                      </p>
+                      <PhotoGallery
+                        photos={plotPhotos}
+                        entityId={plot.id}
+                        entityType="cropPlot"
+                        onPhotosChange={loadPhotos}
+                      />
+                    </div>
 
                     <div className="flex gap-2">
                       <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setShowAddLog(true); }} className="gap-1.5 text-xs">

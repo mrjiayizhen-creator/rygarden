@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Clock, MapPin, Heart, ChevronRight } from "lucide-react";
+import { Plus, Clock, MapPin, Heart, ChevronRight, Image as ImageIcon } from "lucide-react";
+import { PhotoGallery } from "@/components/PhotoGallery";
+import { getMediaForEntity } from "@/lib/mediaStore";
 import type { Beehive, BeeInspection, AppState } from "@/types";
 
 interface BeeManagementProps {
@@ -57,6 +59,15 @@ export function BeeManagement({ state, addItem, addInspection, updateItem, remov
   const hiveInspections = selectedHive ? state.inspections.filter((i) => i.hiveId === selectedHive).sort((a, b) => b.date.localeCompare(a.date)) : [];
 
   const [inspForm, setInspForm] = useState({ honeyFrames: "4", broodPattern: "good" as BeeInspection["broodPattern"], mood: "calm" as BeeInspection["mood"], pests: "", actionTaken: "", notes: "" });
+
+  // Photo system
+  const [hivePhotos, setHivePhotos] = useState<{ id: string; url: string }[]>([]);
+  const loadPhotos = useCallback(async () => {
+    if (!selectedHive) { setHivePhotos([]); return; }
+    const photos = await getMediaForEntity(selectedHive, "beehive");
+    setHivePhotos(photos);
+  }, [selectedHive]);
+  useEffect(() => { loadPhotos(); }, [loadPhotos]);
 
   const handleAddInspection = () => {
     if (!selectedHive) return;
@@ -152,6 +163,19 @@ export function BeeManagement({ state, addItem, addInspection, updateItem, remov
                         ))}
                       </div>
                     )}
+
+                    {/* Photos */}
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
+                        <ImageIcon className="w-3.5 h-3.5" />蜂箱照片
+                      </p>
+                      <PhotoGallery
+                        photos={hivePhotos}
+                        entityId={h.id}
+                        entityType="beehive"
+                        onPhotosChange={loadPhotos}
+                      />
+                    </div>
 
                     <div className="flex gap-2">
                       <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setShowInspection(true); }} className="gap-1.5 text-xs">

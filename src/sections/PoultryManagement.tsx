@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Plus, TrendingUp, Calendar, Egg, Wheat } from "lucide-react";
+import { Plus, TrendingUp, Calendar, Egg, Wheat, ChevronRight, Image as ImageIcon } from "lucide-react";
+import { PhotoGallery } from "@/components/PhotoGallery";
+import { getMediaForEntity } from "@/lib/mediaStore";
 import type { Poultry, FeedingRecord, EggRecord, AppState } from "@/types";
 
 interface PoultryManagementProps {
@@ -38,6 +40,17 @@ export function PoultryManagement({ state, addItem, addItemGeneric, addItemGener
   const [showEgg, setShowEgg] = useState(false);
   const [feedForm, setFeedForm] = useState({ feedType: "", amount: "300", notes: "" });
   const [eggForm, setEggForm] = useState({ count: "5", type: "chicken" as EggRecord["type"] });
+
+  const [selectedPoultry, setSelectedPoultry] = useState<string | null>(null);
+
+  // Photo system for selected poultry
+  const [poultryPhotos, setPoultryPhotos] = useState<{ id: string; url: string }[]>([]);
+  const loadPhotos = useCallback(async () => {
+    if (!selectedPoultry) { setPoultryPhotos([]); return; }
+    const photos = await getMediaForEntity(selectedPoultry, "poultry");
+    setPoultryPhotos(photos);
+  }, [selectedPoultry]);
+  useEffect(() => { loadPhotos(); }, [loadPhotos]);
 
   const handleAdd = () => {
     if (!form.name.trim() || !form.breed.trim()) return;
@@ -136,25 +149,48 @@ export function PoultryManagement({ state, addItem, addItemGeneric, addItemGener
             </div>
           ) : (
             state.poultries.map((p) => (
-              <Card key={p.id}>
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-lg">
-                      {p.type === "chicken" ? "🐔" : p.type === "duck" ? "🦆" : p.type === "goose" ? "🦢" : "🐦"}
+              <Card
+                key={p.id}
+                className={`cursor-pointer hover:shadow-md transition-all duration-200 ${selectedPoultry === p.id ? "ring-2 ring-primary" : ""}`}
+                onClick={() => setSelectedPoultry(selectedPoultry === p.id ? null : p.id)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-lg">
+                        {p.type === "chicken" ? "🐔" : p.type === "duck" ? "🦆" : p.type === "goose" ? "🦢" : "🐦"}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-sm">{p.name} <span className="text-muted-foreground font-normal">({p.breed})</span></h3>
+                        <p className="text-xs text-muted-foreground">
+                          {typeLabels[p.type]} · {p.gender === "hen" ? "母" : p.gender === "rooster" ? "公" : "未知"} · {p.age} 天
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-sm">{p.name} <span className="text-muted-foreground font-normal">({p.breed})</span></h3>
-                      <p className="text-xs text-muted-foreground">
-                        {typeLabels[p.type]} · {p.gender === "hen" ? "母" : p.gender === "rooster" ? "公" : "未知"} · {p.age} 天
+                    <div className="flex items-center gap-2">
+                      <Badge variant={statusBadge[p.status].variant} className="text-xs">{statusBadge[p.status].label}</Badge>
+                      <ChevronRight className={`w-4 h-4 text-muted-foreground transition-transform ${selectedPoultry === p.id ? "rotate-90" : ""}`} />
+                    </div>
+                  </div>
+
+                  {selectedPoultry === p.id && (
+                    <div className="mt-4 pt-4 border-t border-border space-y-3">
+                      <p className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+                        <ImageIcon className="w-3.5 h-3.5" />{p.name}的照片
                       </p>
+                      <PhotoGallery
+                        photos={poultryPhotos}
+                        entityId={p.id}
+                        entityType="poultry"
+                        onPhotosChange={loadPhotos}
+                      />
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive text-xs" onClick={(e) => { e.stopPropagation(); removeItem("poultries", p.id); setSelectedPoultry(null); }}>
+                          删除
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={statusBadge[p.status].variant} className="text-xs">{statusBadge[p.status].label}</Badge>
-                    <Button size="sm" variant="ghost" className="text-destructive h-auto p-1" onClick={() => removeItem("poultries", p.id)}>
-                      &times;
-                    </Button>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
             ))
