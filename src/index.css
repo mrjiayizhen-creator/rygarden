@@ -1,0 +1,84 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 138 76% 97%;
+    --foreground: 143 63% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 143 63% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 143 63% 15%;
+    --primary: 147 72% 29%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 138 60% 92%;
+    --secondary-foreground: 147 72% 25%;
+    --muted: 138 55% 94%;
+    --muted-foreground: 147 30% 40%;
+    --accent: 43 96% 55%;
+    --accent-foreground: 43 80% 15%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 147 30% 85%;
+    --input: 147 30% 85%;
+    --ring: 147 72% 29%;
+    --radius: 0.875rem;
+    --sidebar-background: 147 72% 20%;
+    --sidebar-foreground: 138 40% 95%;
+    --sidebar-primary: 43 96% 55%;
+    --sidebar-primary-foreground: 43 80% 10%;
+    --sidebar-accent: 147 60% 28%;
+    --sidebar-accent-foreground: 138 40% 95%;
+    --sidebar-border: 147 50% 32%;
+    --sidebar-ring: 43 96% 55%;
+  }
+
+  .dark {
+    --background: 147 50% 6%;
+    --foreground: 138 40% 90%;
+    --card: 147 40% 10%;
+    --card-foreground: 138 40% 90%;
+    --popover: 147 40% 10%;
+    --popover-foreground: 138 40% 90%;
+    --primary: 142 71% 45%;
+    --primary-foreground: 147 50% 6%;
+    --secondary: 147 35% 16%;
+    --secondary-foreground: 138 40% 90%;
+    --muted: 147 30% 14%;
+    --muted-foreground: 147 25% 60%;
+    --accent: 43 96% 50%;
+    --accent-foreground: 43 80% 10%;
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 147 30% 22%;
+    --input: 147 30% 22%;
+    --ring: 142 71% 45%;
+    --sidebar-background: 147 40% 8%;
+    --sidebar-foreground: 138 35% 88%;
+    --sidebar-primary: 43 96% 50%;
+    --sidebar-primary-foreground: 43 80% 10%;
+    --sidebar-accent: 147 30% 18%;
+    --sidebar-accent-foreground: 138 35% 88%;
+    --sidebar-border: 147 25% 20%;
+    --sidebar-ring: 43 96% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+  }
+}
+
+@layer components {
+  .page-container {
+    @apply max-w-5xl mx-auto px-4 pb-24 pt-4 sm:pb-8 sm:pt-6;
+  }
+}
