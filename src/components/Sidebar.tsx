@@ -1,9 +1,14 @@
 import type { Page } from "@/types";
-import { LayoutDashboard, Bug, Bird, Sprout, Settings, Flower2 } from "lucide-react";
+import type { User } from "@/hooks/useAuth";
+import { LayoutDashboard, Bug, Bird, Sprout, Settings, Flower2, LogIn, LogOut, User as UserIcon, ChevronDown } from "lucide-react";
+import { useState } from "react";
 
 interface SidebarProps {
   current: Page;
   onNavigate: (page: Page) => void;
+  user: User | null;
+  onOpenAuth: () => void;
+  onLogout: () => void;
 }
 
 const tabs: { key: Page; label: string; icon: React.ReactNode }[] = [
@@ -14,7 +19,9 @@ const tabs: { key: Page; label: string; icon: React.ReactNode }[] = [
   { key: "settings", label: "设置", icon: <Settings className="w-5 h-5" /> },
 ];
 
-export function Sidebar({ current, onNavigate }: SidebarProps) {
+export function Sidebar({ current, onNavigate, user, onOpenAuth, onLogout }: SidebarProps) {
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
   return (
     <aside className="hidden sm:flex flex-col w-56 h-screen sticky top-0 border-r border-border bg-card shrink-0">
       <div className="flex items-center gap-2.5 px-5 h-16 border-b border-border">
@@ -37,9 +44,47 @@ export function Sidebar({ current, onNavigate }: SidebarProps) {
           </button>
         ))}
       </nav>
-      <div className="px-4 py-4 border-t border-border">
-        <p className="text-xs text-muted-foreground">田园管家 v1.0</p>
-        <p className="text-xs text-muted-foreground">记录田园生活的每一天</p>
+      <div className="px-4 py-4 border-t border-border space-y-3">
+        {/* User area */}
+        {user ? (
+          <div className="relative">
+            <button
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="flex items-center gap-2 w-full px-2 py-2 rounded-lg hover:bg-secondary transition-colors"
+            >
+              <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                <UserIcon className="w-4 h-4" />
+              </div>
+              <div className="flex-1 min-w-0 text-left">
+                <p className="text-sm font-medium text-foreground truncate">{user.username}</p>
+                <p className="text-xs text-muted-foreground">会员</p>
+              </div>
+              <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${showUserMenu ? "rotate-180" : ""}`} />
+            </button>
+            {showUserMenu && (
+              <div className="absolute bottom-full left-2 right-2 mb-1 bg-card border border-border rounded-lg shadow-lg py-1 animate-in slide-in-from-bottom-2 duration-150">
+                <button
+                  onClick={() => { onLogout(); setShowUserMenu(false); }}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors rounded-lg"
+                >
+                  <LogOut className="w-4 h-4" />
+                  退出登录
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <button
+            onClick={onOpenAuth}
+            className="flex items-center justify-center gap-2 w-full px-3 py-2 rounded-lg border border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors text-sm font-medium"
+          >
+            <LogIn className="w-4 h-4" />
+            登录 / 注册
+          </button>
+        )}
+        <p className="text-xs text-muted-foreground text-center">
+          记录田园生活的每一天
+        </p>
       </div>
     </aside>
   );

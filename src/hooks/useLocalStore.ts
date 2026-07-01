@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { AppState } from "@/types";
 
-const STORAGE_KEY = "tianyuan-app-state";
+const GUEST_KEY = "tianyuan-app-state";
 
 const defaultState: AppState = {
   beehives: [],
@@ -13,26 +13,31 @@ const defaultState: AppState = {
   gardenLogs: [],
 };
 
-function loadState(): AppState {
+function getStorageKey(userId: string | null): string {
+  return userId ? `tianyuan-app-state-${userId}` : GUEST_KEY;
+}
+
+function loadState(userId: string | null): AppState {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(getStorageKey(userId));
     if (raw) return JSON.parse(raw) as AppState;
   } catch {
     // ignore
   }
-  return defaultState;
+  return { ...defaultState };
 }
 
-function saveState(state: AppState) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
+export function useLocalStore(userId: string | null = null) {
+  const [state, setState] = useState<AppState>(() => loadState(userId));
 
-export function useLocalStore() {
-  const [state, setState] = useState<AppState>(loadState);
+  // When userId changes, reload data for that user
+  useEffect(() => {
+    setState(loadState(userId));
+  }, [userId]);
 
   useEffect(() => {
-    saveState(state);
-  }, [state]);
+    localStorage.setItem(getStorageKey(userId), JSON.stringify(state));
+  }, [state, userId]);
 
   const addItem = useCallback(<K extends keyof AppState>(key: K, item: AppState[K][number]) => {
     setState((prev) => {
