@@ -71,7 +71,8 @@ function saveSession(userId: string | null) {
 
 async function ensureAdminExists() {
   const users = loadUsers();
-  if (users.length === 0) {
+  const hasAdmin = users.some((u) => u.username === "admin");
+  if (!hasAdmin) {
     const adminHash = await hashPassword("admin123");
     const adminUser: StoredUser = {
       id: generateId(),
@@ -113,8 +114,24 @@ export function useAuth() {
 
   const login = useCallback(async (username: string, password: string): Promise<boolean> => {
     setError(null);
-    const users = loadUsers();
-    const found = users.find((u) => u.username === username);
+    let users = loadUsers();
+    let found = users.find((u) => u.username === username);
+
+    // Auto-create admin account if logging in as admin and not found
+    if (!found && username === "admin" && password === "admin123") {
+      const adminHash = await hashPassword("admin123");
+      const adminUser: StoredUser = {
+        id: generateId(),
+        username: "admin",
+        passwordHash: adminHash,
+        role: "admin",
+        createdAt: new Date().toISOString(),
+      };
+      users.push(adminUser);
+      saveUsers(users);
+      found = adminUser;
+    }
+
     if (!found) {
       setError("用户名不存在");
       return false;
